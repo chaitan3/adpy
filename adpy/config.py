@@ -21,11 +21,14 @@ def set_config(config):
     globals()['codeExt'] = config.codeExt
 
 from . import cpp
+cppDir = os.path.realpath(os.path.dirname(cpp.__file__))
+includeDir = os.path.join(cppDir, 'include')
     
 def get_sources():
-    cppDir = os.path.realpath(os.path.dirname(cpp.__file__))
-    includeDir = os.path.join(cppDir, 'include')
     #headers = [os.path.join(includeDir, header) for headers in ['common.hpp', 'gpu.hpp', 'interface.hpp']]
     sources = [os.path.join(cppDir, src) for src in ['interface.cpp']]
-    print includeDir, sources
-    return includeDir, sources
+    return sources
+
+def get_module_sources():
+    sources = [os.path.join(cppDir, src) for src in ['graph.cpp', 'external.cpp']]
+    return sources

@@ -9,9 +9,8 @@ import multiprocessing.pool
 
 from distutils.sysconfig import get_python_inc
 
-from adpy import cpp
+from adpy import config
 
-cppDir = os.path.dirname(cpp.__file__) + '/'
 openmp = 'WITH_OPENMP' in os.environ
 matop = 'WITH_MATOP' in os.environ
 gpu = 'WITH_GPU' in os.environ
@@ -26,12 +25,10 @@ if gpu:
     linker = 'nvcc --shared'
 
 home = os.path.expanduser("~")
-incdirs = [get_python_inc(), np.get_include(), cppDir + '/include']
+incdirs = [get_python_inc(), np.get_include(), config.includeDir]
 libdirs = []
 libs = []
-sources = ['interface.cpp']#, 'mesh.cpp', 'parallel.cpp', 'scaling.cpp']
-sources = [cppDir + x for x in sources]
-sources += ['graph.cpp']
+sources = config.get_sources() + config.get_module_sources()
 sources += [x.format(codeExt) for x in ['kernel.{}', 'code.{}']]
 
 compile_args = ['-std=c++11', '-O3', '-g']

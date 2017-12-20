@@ -1,6 +1,8 @@
 from adpy.variable import Variable, Function
 from adpy.tensor import Kernel
 
+import numpy as np
+
 a = Variable((1,1))
 
 def func(a):
@@ -13,3 +15,6 @@ f = Function('test', (a,), (b,))
 
 Function.compile()
 
+Function._module.initialize(0)
+
+print f(np.ones((1,1)))

@@ -541,9 +541,9 @@ class Function(object):
         while True:
             try:
                 import graph
-                break
+                Function._module = graph
+                return
             except ImportError:
                 time.sleep(1)
                 continue
-            Function._module = graph
 
