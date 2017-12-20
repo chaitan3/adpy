@@ -26,9 +26,7 @@ includeDir = os.path.join(cppDir, 'include')
     
 def get_sources():
     #headers = [os.path.join(includeDir, header) for headers in ['common.hpp', 'gpu.hpp', 'interface.hpp']]
-    sources = [os.path.join(cppDir, src) for src in ['interface.cpp']]
-    return sources
+    return ['interface.cpp']
 
 def get_module_sources():
-    sources = [os.path.join(cppDir, src) for src in ['graph.cpp', 'external.cpp']]
-    return sources
+    return ['graph.cpp', 'external.cpp']

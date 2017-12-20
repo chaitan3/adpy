@@ -519,7 +519,7 @@ class Function(object):
             f.write('#include "code.hpp"\n')
 
     @classmethod
-    def compile(self, env={}):
+    def compile(self, env={}, compile_args=):
         if config.compile:
             with open(self.codeDir + self.codeFile, 'a') as f:
                 f.write("PyMethodDef ExtraMethods[] = {\n")
