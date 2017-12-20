@@ -7,6 +7,4 @@
 #include "kernel.hpp"
 
 #include "external.hpp"
-//#include "parallel.hpp"
-//#include "scaling.hpp"
 #endif

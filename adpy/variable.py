@@ -5,6 +5,8 @@ scriptDir = os.path.dirname(os.path.realpath(__file__))
 from . import config
 from .scalar import *
 import numpy as np
+import time
+
 
 _dtype = dtype
 
@@ -517,7 +519,7 @@ class Function(object):
             f.write('#include "code.hpp"\n')
 
     @classmethod
-    def compile(self):
+    def compile(self, env={}):
         if config.compile:
             with open(self.codeDir + self.codeFile, 'a') as f:
                 f.write("PyMethodDef ExtraMethods[] = {\n")
@@ -526,8 +528,8 @@ class Function(object):
                 f.write("\n\t\t{NULL, NULL, 0, NULL}        /* Sentinel */\n\t};\n")
             if config.openmp:
                 os.environ['WITH_OPENMP'] = '1'
-            if config.matop:
-                os.environ['WITH_MATOP'] = '1'
+            for k, v in env.iteritems():
+                os.environ[k] = v
             if config.gpu:
                 os.environ['WITH_GPU'] = '1'
             if config.gpu_double:
@@ -535,8 +537,13 @@ class Function(object):
             #if config.py3:
             #    subprocess.check_call(['make', 'python3'], cwd=self.codeDir)
             subprocess.check_call(['make'], cwd=self.codeDir)
-        config.parallel.mpi.Barrier()
         sys.path.append(self.codeDir)
-        import graph
-        Function._module = graph
+        while True:
+            try:
+                import graph
+                break
+            except ImportError:
+                time.sleep(1)
+                continue
+            Function._module = graph
 

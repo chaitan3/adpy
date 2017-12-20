@@ -1,4 +1,5 @@
 #include "interface.hpp"
+#include "external.hpp"
 
 #define MODULE graph
 #ifdef PY3
