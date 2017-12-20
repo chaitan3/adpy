@@ -1,7 +1,9 @@
 #ifndef EXTERNAL_HPP
 #define EXTERNAL_HPP
 
-void external_init();
+#include "interface.hpp"
+
+void external_init(PyObject*);
 void external_exit();
 
 #endif

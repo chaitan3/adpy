@@ -1,20 +1,4 @@
-#include "mesh.hpp"
-#include "parallel.hpp"
-
-
-
-void Mesh::build() {}
-void Mesh::buildBeforeWrite() {}
-
-Mesh *meshp = NULL;
-#ifdef GPU
-    cusolverDnHandle_t cusolver_handle;
-    cublasHandle_t cublas_handle;
-#endif
-#ifdef MATOP
-    #include "matop.hpp"
-    Matop *matop;
-#endif
+#include "interface.hpp"
 
 #define MODULE graph
 #ifdef PY3
@@ -25,35 +9,16 @@ Mesh *meshp = NULL;
 #define modName VALUE(MODULE)
 
 PyObject* initialize(PyObject *self, PyObject *args) {
-
-    PyObject *meshObject = PyTuple_GetItem(args, 0);
-    Py_INCREF(meshObject);
-
-    meshp = new Mesh(meshObject);
-    meshp->init();
-    int rank = PyInt_AsLong(PyTuple_GetItem(args, 1));
-    meshp->localRank = rank;
-    parallel_init();
-
+    int rank = PyInt_AsLong(PyTuple_GetItem(args, 0));
     #ifdef GPU
         int count;
         gpuErrorCheck(cudaSetDevice(rank));
         gpuErrorCheck(cudaSetDeviceFlags(cudaDeviceMapHost));
         gpuErrorCheck(cudaGetDeviceCount(&count));
         printf("GPU devices: %d, rank: %d\n", count, meshp->localRank);
-
-        auto status1 = cusolverDnCreate(&cusolver_handle);
-        assert(status1 == CUSOLVER_STATUS_SUCCESS);
-        auto status2 = cublasCreate(&cublas_handle);
-        assert(status2 == CUBLAS_STATUS_SUCCESS);
-
-        //cudaDeviceGetAttribute(&numSMs, cudaDevAttrMultiProcessorCount, 0);
-        //cout << "num sms: " << numSMs << endl;
     #endif
 
-    #ifdef MATOP
-        matop = new Matop();
-    #endif
+    external_init(args);
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -66,11 +31,7 @@ extern PyMethodDef ExtraMethods[];
 static PyMethodDef* Methods;
 
 void interface_exit() {
-    parallel_exit();
-    delete meshp;
-    #ifdef MATOP
-        delete matop;
-    #endif
+    external_exit();
     free(Methods);
 }
 

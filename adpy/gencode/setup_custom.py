@@ -9,7 +9,7 @@ import multiprocessing.pool
 
 from distutils.sysconfig import get_python_inc
 
-from adFVM import cpp
+from adpy import cpp
 
 cppDir = os.path.dirname(cpp.__file__) + '/'
 openmp = 'WITH_OPENMP' in os.environ
