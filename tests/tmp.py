@@ -6,15 +6,11 @@ import numpy as np
 a = Variable((1,1))
 
 def func(a):
-    return 2*a
-
-Function.createCodeDir('./')
+    return 2*a + 3
 
 b = Kernel(func)()(a)[0]
 f = Function('test', (a,), (b,))
 
 Function.compile()
-
-Function.initialize(0)
 
 print f(np.ones((1,1)))

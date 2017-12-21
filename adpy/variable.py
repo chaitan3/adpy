@@ -8,6 +8,7 @@ from .compile import compile_gencode
 
 import numpy as np
 import time
+from cStringIO import StringIO
 
 
 _dtype = dtype
@@ -260,9 +261,12 @@ class ExternalFunctionOp(FunctionOp):
 
 class Function(object):
     _index = 0
+    _init = False
     _module = None
-    codeDir = os.path.dirname(__file__) + '/gencode/'
-    codeFile = 'code.{}'.format(config.codeExt)
+    codeDir = None
+    codeFile = StringIO()
+    kernelCodeFile = StringIO()
+    kernelHeaderFile = StringIO()
     funcs = []
     defaultOptions = {'return_static': True, 
                       'zero_static': False,
@@ -272,6 +276,9 @@ class Function(object):
                      }
 
     def __init__(self, name, inputs, outputs, **kwargs):
+        if not Function._init:
+            Function.clean()
+            Function._init = True
         self._io_map = kwargs.get('io_map', {})
         if config.gpu:
             self.arrType = 'gpuArrType'
@@ -283,8 +290,7 @@ class Function(object):
         self._outputs = outputs
         _outputs = [x for x in self._outputs if x is not None]
         self._children = graphGetChildren(_outputs)
-        if config.compile:
-            self._genCode(_outputs)
+        self._genCode(_outputs)
         FunctionOp.clear_cache()
         Function.funcs.append(self.name)
 
@@ -327,7 +333,7 @@ class Function(object):
         return '{}_{}'.format(self.name, index)
         
     def _genCode(self, outputs):
-        codeFile = open(self.codeDir + self.codeFile, 'a')
+        codeFile = Function.codeFile
         codeFile.write('\nstatic PyObject* Function_{}(PyObject *self, PyObject *args, PyObject *kwargs) {{\n'.format(self.name))
         codeFile.write('\tmap<string, int> options = PyOptions_Parse(kwargs);\n')
         if config.profile:
@@ -468,8 +474,6 @@ class Function(object):
         codeFile.write('\n')
         codeFile.write('}\n\n')
 
-        codeFile.close()
-
     def _diff(self, outputs, inputs, gradients=None):
         children = self._children.copy()
         #print children.values()
@@ -505,41 +509,46 @@ class Function(object):
         return func(*args, **options)
 
     @classmethod
-    def createCodeDir(self, case):
-        self.codeDir = case + 'gencode/'
-        if config.compile:
-            if os.path.exists(self.codeDir):
-                shutil.rmtree(self.codeDir)
-            os.makedirs(self.codeDir)
-            Function.clean()
+    def createCodeDir(cls, case):
+        cls.codeDir = case + 'gencode/'
+        if os.path.exists(cls.codeDir):
+            shutil.rmtree(cls.codeDir)
+        os.makedirs(cls.codeDir)
 
     @classmethod
-    def clean(self):
-        if not config.compile:
-            return
-        with open(self.codeDir + self.codeFile, 'w') as f:
-            f.write('#include "code.hpp"\n')
+    def clean(cls):
+        cls.codeFile.write('#include "code.hpp"\n')
 
     @classmethod
-    def compile(self, compiler_args={}):
-        if config.compile:
-            with open(self.codeDir + self.codeFile, 'a') as f:
-                f.write("PyMethodDef ExtraMethods[] = {\n")
-                for name in Function.funcs:
-                    f.write('\t{{"{0}",(PyCFunction)Function_{0}, METH_VARARGS | METH_KEYWORDS, "boo"}},\n'.format(name))
-                f.write("\n\t\t{NULL, NULL, 0, NULL}        /* Sentinel */\n\t};\n")
-            compile_gencode(self.codeDir, **compiler_args)
+    def compile(cls, case='./', init=True, compiler_args={}):
+        if cls.codeDir is None:
+            cls.createCodeDir(case)
 
-        sys.path.append(self.codeDir)
+        cls.codeFile.write("PyMethodDef ExtraMethods[] = {\n")
+        for name in Function.funcs:
+            cls.codeFile.write('\t{{"{0}",(PyCFunction)Function_{0}, METH_VARARGS | METH_KEYWORDS, "boo"}},\n'.format(name))
+        cls.codeFile.write("\n\t\t{NULL, NULL, 0, NULL}        /* Sentinel */\n\t};\n")
+
+        for name, string in zip(config.get_gen_sources(), [cls.codeFile, cls.kernelCodeFile, cls.kernelHeaderFile]):
+            with open (os.path.join(cls.codeDir, name), 'w') as f:
+                string.seek(0)
+                shutil.copyfileobj(string, f)
+                string.close()
+
+        compile_gencode(cls.codeDir, **compiler_args)
+
+        sys.path.append(cls.codeDir)
         while True:
             try:
                 import graph
                 Function._module = graph
-                return
+                break
             except ImportError:
                 time.sleep(1)
                 continue
+        if init:
+            cls.initialize()
 
     @classmethod
-    def initialize(self, *args, **kwargs):
-        self._module.initialize(*args, **kwargs)
+    def initialize(cls, *args, **kwargs):
+        cls._module.initialize(*args, **kwargs)

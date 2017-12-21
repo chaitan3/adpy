@@ -41,3 +41,9 @@ def get_module_sources(external=True):
     else:
         sources = ['graph.cpp']
     return [os.path.join(moduleDir, x) for x in sources]
+
+def get_gen_sources():
+    codeFile = 'code.{}'.format(codeExt)
+    kernelCodeFile = 'kernel.{}'.format(codeExt)
+    kernelHeaderFile = 'kernel.hpp'
+    return codeFile, kernelCodeFile, kernelHeaderFile

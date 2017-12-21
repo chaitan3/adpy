@@ -11,9 +11,9 @@
 #define modName VALUE(MODULE)
 
 PyObject* initialize(PyObject *self, PyObject *args) {
-    int rank = PyInt_AsLong(PyTuple_GetItem(args, 0));
     #ifdef GPU
         int count;
+        int rank = PyInt_AsLong(PyTuple_GetItem(args, 0));
         gpuErrorCheck(cudaSetDevice(rank));
         gpuErrorCheck(cudaSetDeviceFlags(cudaDeviceMapHost));
         gpuErrorCheck(cudaGetDeviceCount(&count));

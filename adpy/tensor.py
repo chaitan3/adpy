@@ -221,8 +221,6 @@ class Tensor(ArithBase):
 class TensorFunction(object):
     _index = 0
     _init = False
-    codeFile = 'kernel.{}'.format(config.codeExt)
-    headerFile = 'kernel.hpp'
 
     def __init__(self, name, inputs, outputs, grad=True):
         if not TensorFunction._init:
@@ -258,8 +256,7 @@ class TensorFunction(object):
         self._loads = 0
         self._stores = 0
         self._flops = 0
-        if config.compile:
-            self._genCode(self._inputs, _outputs, self._children.copy())
+        self._genCode(self._inputs, _outputs, self._children.copy())
         OpBase.clear_cache()
         if grad:
             self.grad = self._getAdjoint()
@@ -328,8 +325,8 @@ class TensorFunction(object):
 
     def _genCode(self, inputs, outputs, children):
         sortedOps = graphTopologicalSort(outputs, children)
-        codeFile = open(Function.codeDir + self.codeFile, 'a')
-        headerFile = open(Function.codeDir + self.headerFile, 'a')
+        codeFile = Function.kernelCodeFile
+        headerFile = Function.kernelHeaderFile
 
         memString = '' 
         for inp in self._inputTensors:
@@ -438,16 +435,11 @@ class TensorFunction(object):
         codeFile.write('\t}\n')
         #codeFile.write('\tlong long end = current_timestamp(); mil += end-start; printf("c module {}: %lld\\n", mil);\n'.format(self.name))
         codeFile.write('}\n')
-        codeFile.close()
-        headerFile.close()
         return
 
     @classmethod
     def clean(self):
-        if not config.compile:
-            return
-        with open(Function.codeDir + self.codeFile, 'w') as f:
-            f.write('#include "code.hpp"\n')
+        Function.kernelCodeFile.write('#include "code.hpp"\n')
 
 
 import random, string
