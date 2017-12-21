@@ -15,6 +15,6 @@ f = Function('test', (a,), (b,))
 
 Function.compile()
 
-Function._module.initialize(0)
+Function.initialize(0)
 
 print f(np.ones((1,1)))

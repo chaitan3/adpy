@@ -4,6 +4,8 @@ scriptDir = os.path.dirname(os.path.realpath(__file__))
 
 from . import config
 from .scalar import *
+from .compile import compile_gencode
+
 import numpy as np
 import time
 
@@ -508,7 +510,7 @@ class Function(object):
         if config.compile:
             if os.path.exists(self.codeDir):
                 shutil.rmtree(self.codeDir)
-            shutil.copytree(scriptDir + '/gencode', self.codeDir)
+            os.makedirs(self.codeDir)
             Function.clean()
 
     @classmethod
@@ -519,24 +521,15 @@ class Function(object):
             f.write('#include "code.hpp"\n')
 
     @classmethod
-    def compile(self, env={}, compile_args=):
+    def compile(self, compiler_args={}):
         if config.compile:
             with open(self.codeDir + self.codeFile, 'a') as f:
                 f.write("PyMethodDef ExtraMethods[] = {\n")
                 for name in Function.funcs:
                     f.write('\t{{"{0}",(PyCFunction)Function_{0}, METH_VARARGS | METH_KEYWORDS, "boo"}},\n'.format(name))
                 f.write("\n\t\t{NULL, NULL, 0, NULL}        /* Sentinel */\n\t};\n")
-            if config.openmp:
-                os.environ['WITH_OPENMP'] = '1'
-            for k, v in env.iteritems():
-                os.environ[k] = v
-            if config.gpu:
-                os.environ['WITH_GPU'] = '1'
-            if config.gpu_double:
-                os.environ['WITH_GPU_DOUBLE'] = '1'
-            #if config.py3:
-            #    subprocess.check_call(['make', 'python3'], cwd=self.codeDir)
-            subprocess.check_call(['make'], cwd=self.codeDir)
+            compile_gencode(self.codeDir, **compiler_args)
+
         sys.path.append(self.codeDir)
         while True:
             try:
@@ -547,3 +540,6 @@ class Function(object):
                 time.sleep(1)
                 continue
 
+    @classmethod
+    def initialize(self, *args, **kwargs):
+        self._module.initialize(*args, **kwargs)

@@ -23,10 +23,21 @@ def set_config(config):
 from . import cpp
 cppDir = os.path.realpath(os.path.dirname(cpp.__file__))
 includeDir = os.path.join(cppDir, 'include')
+moduleDir = os.path.join(cppDir, 'module')
+
+def get_include_dirs(external=True):
+    if external:
+        return [includeDir, moduleDir]
+    else:
+        return [includeDir]
     
 def get_sources():
     #headers = [os.path.join(includeDir, header) for headers in ['common.hpp', 'gpu.hpp', 'interface.hpp']]
     return ['interface.cpp']
 
-def get_module_sources():
-    return ['graph.cpp', 'external.cpp']
+def get_module_sources(external=True):
+    if external:
+        sources = ['graph.cpp', 'external.cpp']
+    else:
+        sources = ['graph.cpp']
+    return [os.path.join(moduleDir, x) for x in sources]

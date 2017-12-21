@@ -1,3 +1,4 @@
+//#define NO_IMPORT_ARRAY
 #include "interface.hpp"
 #include "external.hpp"
 
