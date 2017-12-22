@@ -6,10 +6,10 @@ import numpy as np
 a = Variable((1,1))
 
 def func(a):
-    return 2*a + 3
+    return 2*a + 3, a*5
 
-b = Kernel(func)()(a)[0]
-f = Function('test', (a,), (b,))
+b, c = Kernel(func)()(a)
+f = Function('test', a, (b, c))
 
 Function.compile()
 

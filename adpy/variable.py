@@ -288,6 +288,18 @@ class Function(object):
             self.arrType = 'arrType'
             #self.arrType = 'gpuArrType'
         self.name = name
+        if isinstance(inputs, list):
+            inputs = tuple(inputs)
+        elif isinstance(inputs, Variable):
+            inputs = (inputs,)
+        if isinstance(outputs, list):
+            outputs = tuple(outputs)
+        elif isinstance(outputs, Variable):
+            outputs = (outputs,)
+        assert isinstance(inputs, tuple)
+        assert isinstance(outputs, tuple)
+        assert all([isinstance(x, Variable) for x in inputs])
+        assert all([isinstance(x, Variable) for x in outputs])
         self._inputs = inputs
         self._outputs = outputs
         _outputs = [x for x in self._outputs if x is not None]

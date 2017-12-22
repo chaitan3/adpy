@@ -135,7 +135,7 @@ def test_gradient():
 
     x, z = Kernel(func)()(a, b, c, y)
     res = Zeros((1, 1))
-    res = Kernel(func2)(n, (res,))(x, y, z)[0]
+    res = Kernel(func2)(n, (res,))(x, y, z)
     f = Function('test_gradient', (a, b, c, y), (res,))
     g = f.getAdjoint()
 

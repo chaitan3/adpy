@@ -472,6 +472,9 @@ def Kernel(func):
                 assert len(outputs) == len(ParamFunc.outputShapes)
                 #args = args + outputs
                 _outputs = outputs
-            return TensorFunctionOp(ParamFunc.tensorFunc, args, _outputs, _indices).outputs
+            ret = TensorFunctionOp(ParamFunc.tensorFunc, args, _outputs, _indices).outputs
+            if len(ret) == 1:
+                return ret[0]
+            return ret
         return Func
     return ParamFunc
