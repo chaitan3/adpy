@@ -18,7 +18,7 @@ class CleanCommand(Command):
 #compile_args = ['-std=c++11', '-O3']#, '-march=native']
 
 setup(name='adpy',
-      version='0.1.1',
+      version='0.2',
       description='adpy',
       author='Chaitanya Talnikar',
       author_email='talnikar@mit.edu',
@@ -29,10 +29,6 @@ setup(name='adpy',
       include_package_data=True,
       install_requires=[ 
           'numpy >= 1.8.2',
-          'scipy >= 0.13.3',
-          #'mpi4py >= 0.13.1',
-          #'h5py >= 2.6.0',
-          #'matplotlib >= 1.3.1'
       ],
       cmdclass={
         'clean': CleanCommand,

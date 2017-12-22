@@ -75,7 +75,7 @@ def compile_gencode(codeDir, moduleName, compiler='ccache gcc', linker='g++', in
 
     n = len(sources)
     #n = 4
-    n = 1
+    #n = 1
     res = list(multiprocessing.pool.ThreadPool(n).imap(single_compile, sources))
 
     cmd = linker + link_args + objects + libdirs + libs + ['-o', module]
