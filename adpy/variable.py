@@ -262,12 +262,14 @@ class ExternalFunctionOp(FunctionOp):
 class Function(object):
     _index = 0
     _init = False
+
     _module = None
     codeDir = None
-    codeFile = StringIO()
-    kernelCodeFile = StringIO()
-    kernelHeaderFile = StringIO()
-    funcs = []
+    codeFile = None
+    kernelCodeFile = None
+    kernelHeaderFile = None
+    funcs = None
+
     defaultOptions = {'return_static': True, 
                       'zero_static': False,
                       'replace_static': False,
@@ -277,8 +279,7 @@ class Function(object):
 
     def __init__(self, name, inputs, outputs, **kwargs):
         if not Function._init:
-            Function.clean()
-            Function._init = True
+            Function.reset()
         self._io_map = kwargs.get('io_map', {})
         if config.gpu:
             self.arrType = 'gpuArrType'
@@ -516,8 +517,16 @@ class Function(object):
         os.makedirs(cls.codeDir)
 
     @classmethod
-    def clean(cls):
+    def reset(cls):
+        cls._module = None
+        cls.codeDir = None
+        cls.codeFile = StringIO()
+        cls.kernelCodeFile = StringIO()
+        cls.kernelHeaderFile = StringIO()
+        cls.funcs = []
         cls.codeFile.write('#include "code.hpp"\n')
+        cls.kernelCodeFile.write('#include "code.hpp"\n')
+        cls._init = True
 
     @classmethod
     def compile(cls, case='./', init=True, compiler_args={}):
@@ -548,6 +557,7 @@ class Function(object):
                 continue
         if init:
             cls.initialize()
+        cls._init = False
 
     @classmethod
     def initialize(cls, *args, **kwargs):

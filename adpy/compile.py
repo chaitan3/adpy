@@ -55,17 +55,22 @@ def compile_gencode(codeDir, compiler='ccache gcc', linker='g++', incdirs=[], li
     libs = ['-l' + lib for lib in libs]
     objects = [os.path.basename(src).split('.')[0] + '.o' for src in sources]
 
+    print('Compiling module', os.path.join(codeDir, module))
+
     def single_compile(src):
         cmd = compiler + compile_args + incdirs + [src, '-c']
-        print(' '.join(cmd))
-        subprocess.check_call(cmd, stderr=subprocess.STDOUT, cwd=codeDir)
+        with open(os.path.join(codeDir, 'output.log'), 'a') as f, open(os.path.join(codeDir, 'error.log'), 'a') as fe: 
+            f.write(' '.join(cmd))
+            subprocess.check_call(cmd, stdout=f, stderr=fe, cwd=codeDir)
 
     n = len(sources)
     #n = 4
-    n = 1
+    #n = 1
     res = list(multiprocessing.pool.ThreadPool(n).imap(single_compile, sources))
 
     cmd = linker + link_args + objects + libdirs + libs + ['-o', module]
-    print(' '.join(cmd))
-    subprocess.check_call(cmd, stderr=subprocess.STDOUT, cwd=codeDir)
-    print()
+    #print(' '.join(cmd))
+    with open(os.path.join(codeDir, 'output.log'), 'a') as f, open(os.path.join(codeDir, 'error.log'), 'a') as fe: 
+        f.write(' '.join(cmd))
+        subprocess.check_call(cmd, stderr=subprocess.STDOUT, cwd=codeDir)
+    #print()

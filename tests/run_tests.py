@@ -159,8 +159,8 @@ def test_gradient():
         assert np.allclose(fd, ad)
 
 if __name__ == '__main__':
-    #test_arithmetic()
-    #test_reduction()
+    test_arithmetic()
+    test_reduction()
     #test_indirect_access()
     #test_matvec()
-    test_gradient()
+    #test_gradient()

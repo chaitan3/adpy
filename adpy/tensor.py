@@ -220,12 +220,10 @@ class Tensor(ArithBase):
 
 class TensorFunction(object):
     _index = 0
-    _init = False
 
     def __init__(self, name, inputs, outputs, grad=True):
-        if not TensorFunction._init:
-            TensorFunction.clean()
-            TensorFunction._init = True
+        if not Function._init:
+            Function.reset()
 
         index = TensorFunction._index
         TensorFunction._index += 1
@@ -436,11 +434,6 @@ class TensorFunction(object):
         #codeFile.write('\tlong long end = current_timestamp(); mil += end-start; printf("c module {}: %lld\\n", mil);\n'.format(self.name))
         codeFile.write('}\n')
         return
-
-    @classmethod
-    def clean(self):
-        Function.kernelCodeFile.write('#include "code.hpp"\n')
-
 
 import random, string
 random.seed(3)
