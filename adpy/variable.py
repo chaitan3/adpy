@@ -8,6 +8,7 @@ from .compile import compile_gencode
 
 import numpy as np
 import time
+import sys
 from cStringIO import StringIO
 
 
@@ -510,11 +511,12 @@ class Function(object):
         return func(*args, **options)
 
     @classmethod
-    def createCodeDir(cls, case):
+    def createCodeDir(cls, case, replace=True):
         cls.codeDir = case + 'gencode/'
-        if os.path.exists(cls.codeDir):
-            shutil.rmtree(cls.codeDir)
-        os.makedirs(cls.codeDir)
+        if replace:
+            if os.path.exists(cls.codeDir):
+                shutil.rmtree(cls.codeDir)
+            os.makedirs(cls.codeDir)
 
     @classmethod
     def reset(cls):
@@ -527,34 +529,39 @@ class Function(object):
         cls.codeFile.write('#include "code.hpp"\n')
         cls.kernelCodeFile.write('#include "code.hpp"\n')
         cls._init = True
+        cls._index += 1
 
     @classmethod
-    def compile(cls, case='./', init=True, compiler_args={}):
+    def compile(cls, case='./', init=True, replace=True, compiler_args={}):
         if cls.codeDir is None:
-            cls.createCodeDir(case)
+            cls.createCodeDir(case, replace=replace)
 
         cls.codeFile.write("PyMethodDef ExtraMethods[] = {\n")
         for name in Function.funcs:
             cls.codeFile.write('\t{{"{0}",(PyCFunction)Function_{0}, METH_VARARGS | METH_KEYWORDS, "boo"}},\n'.format(name))
         cls.codeFile.write("\n\t\t{NULL, NULL, 0, NULL}        /* Sentinel */\n\t};\n")
 
-        for name, string in zip(config.get_gen_sources(), [cls.codeFile, cls.kernelCodeFile, cls.kernelHeaderFile]):
-            with open (os.path.join(cls.codeDir, name), 'w') as f:
-                string.seek(0)
-                shutil.copyfileobj(string, f)
-                string.close()
+        moduleName = 'graph_{}'.format(cls._index)
 
-        compile_gencode(cls.codeDir, **compiler_args)
+        if replace:
+            for name, string in zip(config.get_gen_sources(), [cls.codeFile, cls.kernelCodeFile, cls.kernelHeaderFile]):
+                with open (os.path.join(cls.codeDir, name), 'w') as f:
+                    string.seek(0)
+                    shutil.copyfileobj(string, f)
+                    string.close()
+
+            compile_gencode(cls.codeDir, moduleName, **compiler_args)
 
         sys.path.append(cls.codeDir)
         while True:
             try:
-                import graph
-                Function._module = graph
+                Function._module = __import__(moduleName)
                 break
-            except ImportError:
+            #except ImportError:
+            except NotImplemented:
                 time.sleep(1)
                 continue
+        
         if init:
             cls.initialize()
         cls._init = False

@@ -9,7 +9,15 @@ from distutils.sysconfig import get_python_inc
 
 from . import config
 
-def compile_gencode(codeDir, compiler='ccache gcc', linker='g++', incdirs=[], libdirs=[], libs=[], sources=[]):
+def compile_gencode(codeDir, moduleName, compiler='ccache gcc', linker='g++', incdirs=None, libdirs=None, libs=None, sources=None):
+    if incdirs is None:
+        incdirs = []
+    if libdirs is None:
+        libdirs = []
+    if libs is None:
+        libs = []
+    if sources is None:
+        sources = []
     codeDir = os.path.realpath(codeDir)
     openmp = config.openmp
     gpu = config.gpu
@@ -29,6 +37,7 @@ def compile_gencode(codeDir, compiler='ccache gcc', linker='g++', incdirs=[], li
     sources += [x.format(codeExt) for x in ['kernel.{}', 'code.{}']]
 
     compile_args = ['-std=c++11', '-O3', '-g']
+    compile_args += ["-DMODULE={}".format(moduleName)]
     link_args = []
     if openmp:
         compile_args += ['-fopenmp']
@@ -47,7 +56,7 @@ def compile_gencode(codeDir, compiler='ccache gcc', linker='g++', incdirs=[], li
         compile_args += ['-Wfatal-errors']
         link_args += ['-shared']
 
-    module = 'graph.so'
+    module = '{}.so'.format(moduleName)
     incdirs = ['-I'+inc for inc in incdirs]
     libdirs = ['-L'+lib for lib in libdirs]
     compiler = compiler.split(' ')
@@ -61,11 +70,12 @@ def compile_gencode(codeDir, compiler='ccache gcc', linker='g++', incdirs=[], li
         cmd = compiler + compile_args + incdirs + [src, '-c']
         with open(os.path.join(codeDir, 'output.log'), 'a') as f, open(os.path.join(codeDir, 'error.log'), 'a') as fe: 
             f.write(' '.join(cmd))
+            #print(' '.join(cmd))
             subprocess.check_call(cmd, stdout=f, stderr=fe, cwd=codeDir)
 
     n = len(sources)
     #n = 4
-    #n = 1
+    n = 1
     res = list(multiprocessing.pool.ThreadPool(n).imap(single_compile, sources))
 
     cmd = linker + link_args + objects + libdirs + libs + ['-o', module]

@@ -2,7 +2,10 @@
 #include "interface.hpp"
 #include "external.hpp"
 
-#define MODULE graph
+#ifndef MODULE
+    #define MODULE graph
+#endif
+
 #ifdef PY3
     #define initFunc GET_MODULE(PyInit_,MODULE)
 #else
