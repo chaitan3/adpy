@@ -304,15 +304,14 @@ class Function(object):
             outputs = (outputs,)
         assert isinstance(inputs, tuple)
         assert isinstance(outputs, tuple)
-        assert all([isinstance(x, Variable) for x in inputs])
+        assert all([isinstance(x, Variable) or isinstance(x, IntegerScalar) for x in inputs])
         assert all([isinstance(x, Variable) for x in outputs])
         self._inputs = inputs
         self._outputs = outputs
         _outputs = [x for x in self._outputs if x is not None]
         self._children, discoveredInputs = graphGetChildren(_outputs)
         discoveredInputs = [x for x in discoveredInputs if not isinstance(x, Zeros)]
-        #print(inputs, discoveredInputs)
-        assert set(discoveredInputs) == set(inputs)
+        assert set(discoveredInputs).issubset(set(inputs))
         
         self._genCode(_outputs)
         FunctionOp.clear_cache()
