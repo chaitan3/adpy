@@ -245,6 +245,9 @@ binaryOpClass = {operator.truediv: DivOp,
 class ConditionalOp(OpBase):
     def __init__(self, cond, a, b):
         self.args = (cond, a, b)
+        assert isinstance(cond, Scalar)
+        assert isinstance(a, Scalar)
+        assert isinstance(b, Scalar)
 
     def c_code(self, names):
         cond, x1, x2 = self.args
@@ -268,6 +271,9 @@ class ConditionalOp(OpBase):
 class Extract(OpBase):
     def __init__(self, *args):
         self.args = tuple(args)
+        x, b = args
+        assert isinstance(x, Scalar)
+        assert isinstance(b, IntegerScalar) or isinstance(b, IndexOp)
                                 
     def grad(self, gradient):
         x, b = self.args        
@@ -276,6 +282,11 @@ class Extract(OpBase):
 class Collate(OpBase):
     def __init__(self, *args):
         self.args = tuple(args)
+        n = len(self.args)//2
+        for i in range(0, n):
+            x, b = self.args[2*i], self.args[2*i+1]
+            assert isinstance(x, Scalar)
+            assert isinstance(b, IntegerScalar) or isinstance(b, IndexOp)
     
     def grad(self, gradient):
         n = len(self.args)//2
@@ -288,6 +299,7 @@ class Collate(OpBase):
 
 class Reduce(OpBase):
     def __init__(self, opType, x):
+        assert isinstance(x, Scalar)
         self.opType = opType
         self.args = (x,)
 
@@ -300,6 +312,7 @@ class Reduce(OpBase):
 
 class Singular(OpBase):
     def __init__(self, x):
+        assert isinstance(x, Scalar)
         self.args = (x,)
 
     def grad(self, gradient):
