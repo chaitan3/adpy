@@ -60,6 +60,9 @@ class Variable(ArithBase):
         self.index = 0
         self.outputIndex = None
         self.static = False
+        assert dtype in ['integer', 'scalar']
+        assert isinstance(shape, tuple)
+        assert all([isinstance(x, int) or isinstance(x, IntegerScalar) for x in shape])
 
     def __getitem__(self, index):
         #print self.index

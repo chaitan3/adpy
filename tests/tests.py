@@ -158,9 +158,7 @@ def test_gradient():
 
 if __name__ == '__main__':
     test_arithmetic()
-    import shutil
-    shutil.rmtree('gencode')
-    test_reduction()
+    #test_reduction()
     #test_indirect_access()
     #test_matvec()
     #test_gradient()

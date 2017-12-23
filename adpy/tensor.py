@@ -442,6 +442,7 @@ def randomName(N):
 
 
 def Kernel(func):
+    assert callable(func)
     def ParamFunc(indices=None, outputs=None):
         def Func(*args, **kwargs):
             if not hasattr(ParamFunc, 'tensorFunc'):
@@ -450,26 +451,31 @@ def Kernel(func):
                 tensorArgs = []
                 #print len(args), len(kwargs)
                 for x in args:
+                    assert isinstance(x, Variable)
                     if x.dtype == dtype:
                         tensorArgs.append(Tensor(x.shape[1:]))
                     elif x.dtype == 'integer':
                         tensorArgs.append(Tensor(x.shape[1:], scalars=[IntegerScalar() for i in range(0, x.shape[1])]))
                     else:
                         raise Exception(x.dtype)
+
                 tensorOutputs = func(*tensorArgs, **kwargs)
                 shape = args[0].shape[0]
                 if not isinstance(tensorOutputs, tuple):
                     tensorOutputs = (tensorOutputs,)
-                ParamFunc.outputShapes = [(shape,) + x.shape for x in tensorOutputs]
+                ParamFunc.outputsInfo = [((shape,) + x.shape, x.dtype) for x in tensorOutputs]
                 ParamFunc.tensorFunc = TensorFunction(name, tensorArgs, tensorOutputs)
 
             _indices = indices
             if _indices == None:
-                _indices = ParamFunc.outputShapes[0][0]
+                _indices = ParamFunc.outputsInfo[0][0][0]
+            assert isinstance(_indices, int) or isinstance(_indices, IntegerScalar)
             if outputs is None:
-                _outputs = tuple([Zeros(x) for x in ParamFunc.outputShapes])
+                _outputs = tuple([Zeros(x[0]) for x in ParamFunc.outputsInfo])
             else:
-                assert len(outputs) == len(ParamFunc.outputShapes)
+                assert len(outputs) == len(ParamFunc.outputsInfo)
+                assert [out1.shape == out2[0] and out1.dtype == out2[1] \
+                        for out1, out2 in zip(outputs, ParamFunc.outputsInfo)]
                 #args = args + outputs
                 _outputs = outputs
             ret = TensorFunctionOp(ParamFunc.tensorFunc, args, _outputs, _indices).outputs
