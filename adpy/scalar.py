@@ -118,6 +118,7 @@ class OpBase(Scalar):
 
 class ConstantOp(OpBase):
     def __init__(self, constant):
+        assert isinstance(constant, float) or isinstance(constant, int)
         self.constant = constant
         self.args = tuple()
         self.dtype = dtype
@@ -140,6 +141,9 @@ class IndexOp(OpBase):
 
 class BinaryOp(OpBase):
     def __init__(self, op, a, b, comparison=False):
+        #print(type(a), type(b))
+        assert isinstance(a, Scalar)
+        assert isinstance(b, Scalar) or isinstance(b, IntegerScalar)
         self.op = op
         self.args = (a, b)
         self.comparison = comparison
@@ -190,6 +194,7 @@ class PowerOp(BinaryOp):
 class UnaryOp(OpBase):
     def __init__(self, op, a):
         self.op = op
+        assert isinstance(a, Scalar)
         self.args = (a,)
 
     def c_code(self, names):

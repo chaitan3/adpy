@@ -493,7 +493,10 @@ class Function(object):
                 codeFile.write('\t}\n');
             else:
                 codeFile.write('\tPyTuple_SetItem(outputs, {}, putArray({}, false));\n'.format(index, out.name))
-        codeFile.write('\treturn outputs;')
+        if len(outputs) == 1:
+            codeFile.write('\treturn PyTuple_GetItem(outputs, 0);')
+        else:
+            codeFile.write('\treturn outputs;')
         codeFile.write('\n')
         codeFile.write('}\n\n')
 
