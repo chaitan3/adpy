@@ -16,8 +16,11 @@ _dtype = dtype
 
 def graphGetChildren(outputs):
     children = {}
+    inputs = []
 
     def _childrenFunc(out):
+        if len(out.args) == 0:
+            inputs.append(out)
         for inp in out.args:
             if inp in children:
                 children[inp] += 1
@@ -30,7 +33,7 @@ def graphGetChildren(outputs):
     _childrenFunc(output)
     for out in outputs:
         children[out] -= 1
-    return children
+    return children, inputs
 
 def graphTopologicalSort(outputs, children):
     output = Container()
@@ -306,7 +309,11 @@ class Function(object):
         self._inputs = inputs
         self._outputs = outputs
         _outputs = [x for x in self._outputs if x is not None]
-        self._children = graphGetChildren(_outputs)
+        self._children, discoveredInputs = graphGetChildren(_outputs)
+        discoveredInputs = [x for x in discoveredInputs if not isinstance(x, Zeros)]
+        #print(inputs, discoveredInputs)
+        assert set(discoveredInputs) == set(inputs)
+        
         self._genCode(_outputs)
         FunctionOp.clear_cache()
         Function.funcs.append(self.name)

@@ -248,7 +248,7 @@ class TensorFunction(object):
         #self.func = lambdify(self._inputs, self._outputs)
 
         _outputs = [x for x in self._outputs if x is not None]
-        self._children = graphGetChildren(_outputs)
+        self._children, _ = graphGetChildren(_outputs)
         self._inputsUsed = [inp.scalars[0] in self._children for inp in self._inputTensors]
 
         self._loads = 0
