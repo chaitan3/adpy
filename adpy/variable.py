@@ -11,7 +11,6 @@ import time
 import sys
 from cStringIO import StringIO
 
-
 _dtype = dtype
 
 def graphGetChildren(outputs):
@@ -365,6 +364,7 @@ class Function(object):
         #    memString += '{}* {}, '.format(out.dtype, out.name)
         memoryInit = {}
         keepMemory = {True: 'true', False: 'false'}[not config.gc]
+        codeFile.write('\tassert(PyTuple_Size(args) == {});\n'.format(len(self._inputs)))
         for index, inp in enumerate(self._inputs):
             if isinstance(inp, IntegerScalar):
                 codeFile.write('\tinteger {} = (integer) PyInt_AsLong(PyTuple_GetItem(args, {}));\n'.format(inp.name, index))
