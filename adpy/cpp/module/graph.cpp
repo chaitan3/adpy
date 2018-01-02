@@ -20,7 +20,7 @@ PyObject* initialize(PyObject *self, PyObject *args) {
         gpuErrorCheck(cudaSetDevice(rank));
         gpuErrorCheck(cudaSetDeviceFlags(cudaDeviceMapHost));
         gpuErrorCheck(cudaGetDeviceCount(&count));
-        printf("GPU devices: %d, rank: %d\n", count, meshp->localRank);
+        printf("GPU devices: %d, rank: %d\n", count, rank);
     #endif
 
     external_init(args);
