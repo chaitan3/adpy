@@ -24,7 +24,7 @@ setup(name='adpy',
       author_email='talnikar@mit.edu',
       packages=['adpy'],
       package_data={
-       'adpy': ['gencode/*', 'cpp/*.cpp', 'cpp/*.py', 'cpp/include/*'],
+       'adpy': ['gencode/*', 'cpp/*.cpp', 'cpp/*.py', 'cpp/include/*', 'cpp/module/*'],
       },
       include_package_data=True,
       install_requires=[ 
