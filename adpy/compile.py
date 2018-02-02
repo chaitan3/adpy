@@ -9,7 +9,7 @@ from distutils.sysconfig import get_python_inc
 
 from . import config
 
-def compile_gencode(codeDir, moduleName, compiler='ccache gcc', linker='g++', incdirs=None, libdirs=None, libs=None, sources=None):
+def compile_gencode(codeDir, moduleName, compiler='ccache gcc', linker='g++', incdirs=None, libdirs=None, libs=None, sources=None, extra_compile_args=None):
     if incdirs is None:
         incdirs = []
     if libdirs is None:
@@ -18,6 +18,8 @@ def compile_gencode(codeDir, moduleName, compiler='ccache gcc', linker='g++', in
         libs = []
     if sources is None:
         sources = []
+    if extra_compile_args is None:
+        extra_compile_args = []
     codeDir = os.path.realpath(codeDir)
     openmp = config.openmp
     gpu = config.gpu
@@ -36,24 +38,24 @@ def compile_gencode(codeDir, moduleName, compiler='ccache gcc', linker='g++', in
     sources += [os.path.join(config.cppDir, x) for x in config.get_sources()]
     sources += [x.format(codeExt) for x in ['kernel.{}', 'code.{}']]
 
-    compile_args = ['-std=c++11', '-O3', '-g']
-    compile_args += ["-DMODULE={}".format(moduleName)]
+    extra_compile_args += ['-std=c++11', '-O3', '-g']
+    extra_compile_args += ["-DMODULE={}".format(moduleName)]
     link_args = []
     if openmp:
-        compile_args += ['-fopenmp']
+        extra_compile_args += ['-fopenmp']
         link_args = ['-lgomp']
     if gpu:
         #cmdclass = {}
         nv_arch="-gencode=arch=compute_52,code=\"sm_52,compute_52\""
-        compile_args += [nv_arch, '-Xcompiler=-fPIC']
-        compile_args += ['-DGPU']
+        extra_compile_args += [nv_arch, '-Xcompiler=-fPIC']
+        extra_compile_args += ['-DGPU']
         if gpu_double:
-            compile_args += ['-DGPU_DOUBLE']
+            extra_compile_args += ['-DGPU_DOUBLE']
         
         libs += ['gomp']
     else:
-        compile_args += ['-fPIC', '-Wall', '-march=native']
-        compile_args += ['-Wfatal-errors']
+        extra_compile_args += ['-fPIC', '-Wall', '-march=native']
+        extra_compile_args += ['-Wfatal-errors']
         link_args += ['-shared']
 
     module = '{}.so'.format(moduleName)
@@ -67,7 +69,7 @@ def compile_gencode(codeDir, moduleName, compiler='ccache gcc', linker='g++', in
     print('Compiling module', os.path.join(codeDir, module))
 
     def single_compile(src):
-        cmd = compiler + compile_args + incdirs + [src, '-c']
+        cmd = compiler + extra_compile_args + incdirs + [src, '-c']
         with open(os.path.join(codeDir, 'output.log'), 'a') as f, open(os.path.join(codeDir, 'error.log'), 'a') as fe: 
             f.write(' '.join(cmd))
             #print(' '.join(cmd))
