@@ -379,7 +379,7 @@ class Function(object):
             codeFile.write('\tPyObject* Py_{} = PyTuple_GetItem(args, {});\n'.format(inp.name, index))
             shape = ','.join([str(x) for x in inp.shape[1:]])
             codeFile.write('\t{}<{}, {}> {};\n'.format(self.arrType, inp.dtype, shape, inp.name))
-            if index in self._io_map.keys():
+            if index in self._io_map:
                 reuseId = self._reuseId(index)
                 codeFile.write('\tif (options["replace_reusable"] || {}.get_mem()->reuse.count("{}") == 0) {{\n'.format(inp.name, reuseId))
                 codeFile.write('\t\tgetArray((PyArrayObject*) Py_{0}, {0}, {2}, {1}L);\n'.format(inp.name, inp.staticId(), keepMemory))
@@ -489,7 +489,7 @@ class Function(object):
                 codeFile.write('\t\t{}.zero();\n'.format(out.name))
                 codeFile.write('\t}\n');
             elif index in self._io_map.values():
-                key =  self._io_map.keys()[self._io_map.values().index(index)]
+                key =  list(self._io_map.keys())[list(self._io_map.values()).index(index)]
                 codeFile.write('\t{}.reuse_release("{}");\n'.format(out.name, self._reuseId(key)))
                 codeFile.write('\tif (options["return_reusable"]) {\n');
                 codeFile.write('\t\tPyTuple_SetItem(outputs, {}, putArray({}, false));\n'.format(index, out.name))
