@@ -9,7 +9,10 @@ from .compile import compile_gencode
 import numpy as np
 import time
 import sys
-from cStringIO import StringIO
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 _dtype = dtype
 
