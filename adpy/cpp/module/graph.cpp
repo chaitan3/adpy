@@ -51,9 +51,9 @@ initFunc(void)
         n++;
     }
     n++;
-    Methods = (PyMethodDef*) malloc(sizeof(PyMethodDef)*(2+n));
-    memcpy(Methods, StaticMethods, sizeof(PyMethodDef)*2);
-    memcpy(Methods + 2, ExtraMethods, sizeof(PyMethodDef)*n);
+    Methods = (PyMethodDef*) malloc(sizeof(PyMethodDef)*(1+n));
+    memcpy(Methods, StaticMethods, sizeof(PyMethodDef)*1);
+    memcpy(Methods + 1, ExtraMethods, sizeof(PyMethodDef)*n);
 
     #ifdef PY3
         static struct PyModuleDef moduledef = {
@@ -64,8 +64,10 @@ initFunc(void)
             Methods            /* m_methods */
         };
         m = PyModule_Create(&moduledef);
-        if (m == NULL)
+        if (m == NULL) {
+            cout << "Module import failed: " << modName << endl;
             return NULL;
+        }
     #else
         m = Py_InitModule(modName, Methods);
         if (m == NULL)
