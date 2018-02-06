@@ -569,6 +569,7 @@ class Function(object):
         cls.codeFile.write("\n\t\t{NULL, NULL, 0, NULL}        /* Sentinel */\n\t};\n")
 
         moduleName = 'graph_{}'.format(cls._index)
+        #moduleName = 'graph{}'.format(cls._index)
 
         if replace:
             for name, string in zip(config.get_gen_sources(), [cls.codeFile, cls.kernelCodeFile, cls.kernelHeaderFile]):
@@ -581,8 +582,12 @@ class Function(object):
 
         sys.path.append(cls.codeDir)
         while True:
+            import importlib
+            Function._module = importlib.import_module(moduleName)
             try:
-                Function._module = __import__(moduleName)
+                #Function._module = __import__(moduleName)
+                import importlib
+                Function._module = importlib.import_module(moduleName)
                 break
             #except ImportError:
             except NotImplemented:

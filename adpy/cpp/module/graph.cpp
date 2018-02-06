@@ -64,6 +64,8 @@ initFunc(void)
             Methods            /* m_methods */
         };
         m = PyModule_Create(&moduledef);
+        if (m == NULL)
+            return NULL;
     #else
         m = Py_InitModule(modName, Methods);
         if (m == NULL)
