@@ -3,7 +3,6 @@
 adpy is a library useful for defining operations of a numerical simulation tool in the form of a computational graph. The graph can be executed on CPUs and GPUs and the adjoint graph can be derived using automatic differentiation provided by the library.
 
 ## Installation
-```
 Build and install adpy using the following commands 
 ```
 python setup.py build
