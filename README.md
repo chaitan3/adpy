@@ -18,6 +18,9 @@ cd tests
 cd ..
 ```
 
+## Status
+[![Build Status](https://api.travis-ci.org/chaitan3/adpy.png)](https://travis-ci.org/chaitan3/adpy)
+
 ## Examples
 An example of how to use the adpy library can be found in the tmp.py
 file in the tests folder.

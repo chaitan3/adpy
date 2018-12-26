@@ -13,4 +13,4 @@ f = Function('test', a, b)
 
 Function.compile()
 
-print f(np.ones((1,1)))
+print(f(np.ones((1,1))))
