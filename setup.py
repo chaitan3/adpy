@@ -29,6 +29,7 @@ setup(name='adpy',
       include_package_data=True,
       install_requires=[ 
           'numpy >= 1.8.2',
+          'pytest',
       ],
       cmdclass={
         'clean': CleanCommand,
