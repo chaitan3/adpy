@@ -4,9 +4,9 @@ adpy is a library useful for defining operations of a numerical simulation tool 
 
 ## Installation
 
-Install ccache. For Ubuntu, the command is given below
+Install ccache and gcc. For Ubuntu, the command is given below
 ```
-sudo apt install ccache
+sudo apt install ccache gcc
 ```
 
 Build and install adpy using the following commands 
