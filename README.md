@@ -3,6 +3,12 @@
 adpy is a library useful for defining operations of a numerical simulation tool in the form of a computational graph. The graph can be executed on CPUs and GPUs and the adjoint graph can be derived using automatic differentiation provided by the library.
 
 ## Installation
+
+Install ccache. For Ubuntu, the command is given below
+```
+sudo apt install ccache
+```
+
 Build and install adpy using the following commands 
 ```
 python setup.py build

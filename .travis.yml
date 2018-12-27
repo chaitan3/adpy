@@ -6,6 +6,8 @@ python:
 
 install: 
     - pip install .
+    - sudo apt-get update
+    - sudo apt-get install ccache
 
 script: 
     - tests/run_tests.sh

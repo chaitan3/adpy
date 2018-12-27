@@ -1,3 +1,4 @@
 #!/bin/bash
+DIR=$(dirname "${BASH_SOURCE[0]}")
 
-pytest tests.py
+pytest $DIR/tests.py
