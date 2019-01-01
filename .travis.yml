@@ -7,9 +7,10 @@ python:
     - "3.7"
 
 install: 
-    - pip install .
     - sudo apt-get update
-    - sudo apt-get install ccache
+    - sudo apt-get install ccache gcc
+    - pip install numpy
+    - pip install .
 
 script: 
     - tests/run_tests.sh
